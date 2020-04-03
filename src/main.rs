@@ -2,7 +2,6 @@
 
 use regex::Regex;
 use std::path::Path;
-
 mod manipulator;
 mod read_file;
 mod scan;
@@ -17,5 +16,5 @@ fn main() {
     let changer: manipulator::Printer = Default::default();
     let scan = scan::RegexFilter::new(re_line, Box::new(changer));
 
-    read_file::find_files(&dir, re_file, Box::new(scan));
+    read_file::find_files(&dir, &re_file, &Box::new(scan));
 }

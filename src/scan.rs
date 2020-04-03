@@ -1,9 +1,9 @@
+use crate::manipulator::Manipulator;
 use regex::Regex;
 use std::fs::DirEntry;
-use crate::manipulator::Manipulator;
 
 pub trait Scan {
-    fn scan(self: &mut Self, file: &DirEntry);
+    fn scan(self: &Self, file: &DirEntry);
 }
 
 pub struct RegexFilter {
@@ -12,7 +12,7 @@ pub struct RegexFilter {
 }
 
 impl Scan for RegexFilter {
-    fn scan(self: &mut Self, file: &DirEntry) {
+    fn scan(self: &Self, file: &DirEntry) {
         log::trace!("Scanning nothing...");
         // go over lines of file?
     }
