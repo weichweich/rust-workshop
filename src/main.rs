@@ -10,8 +10,8 @@ fn main() {
 
     let re_file = Regex::new(r".*\.txt").unwrap();
     let re_line = Regex::new(r".*").unwrap();
-
     let dir = Path::new(".");
+
     let changer: manipulator::Printer = Default::default();
     let scan = scan::RegexFilter::new(re_line, Box::new(changer));
 

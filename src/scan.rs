@@ -13,6 +13,7 @@ pub struct RegexFilter {
 
 impl Scan for RegexFilter {
     fn scan(self: &mut Self, file: &DirEntry) {
+        log::trace!("Scanning nothing...");
         // go over lines of file?
     }
 }
