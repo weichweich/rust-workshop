@@ -2,7 +2,7 @@
 #![deny(unsafe_code)]
 
 use regex::Regex;
-use std::{error::Error, path::Path};
+use std::{error::Error, path::{PathBuf, Path}};
 use structopt::StructOpt;
 
 mod manipulator;
@@ -21,6 +21,19 @@ pub struct Opt {
         help = "Sets the level of verbosity."
     )]
     verbose: u8,
+
+    #[structopt(short = "f", long = "file", default_value = ".*")]
+    file_re: String,
+
+    #[structopt(short = "l", long = "line", default_value = ".*")]
+    line_re: String,
+
+    // impossible to match r"a^" -> nothing will be highlighted
+    #[structopt(short = "h", long = "highlight", default_value = "a^")]
+    highlight_re: String,
+
+    #[structopt(short = "d", long = "dir", default_value = ".")]
+    dir: PathBuf,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -31,14 +44,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!("Hello, world!");
 
-    let re_file = Regex::new(r".*\.txt").unwrap();
-    let re_line = Regex::new(r".*").unwrap();
-    let dir = Path::new(".");
+    let re_file = Regex::new(&opt.file_re)?;
+    let re_line = Regex::new(&opt.line_re)?;
+    // let re_highlight = Regex::new(&opt.highlight_re)?;
 
     let changer: manipulator::Printer = Default::default();
     let scan = scan::RegexFilter::new(re_line, Box::new(changer));
 
-    read_file::find_files(&dir, re_file, Box::new(scan));
+    read_file::find_files(opt.dir.as_path(), re_file, Box::new(scan));
 
     Ok(())
 }
