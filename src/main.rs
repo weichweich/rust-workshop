@@ -1,3 +1,5 @@
+#![warn(clippy::all)]
+
 use regex::Regex;
 use std::path::Path;
 
