@@ -49,18 +49,19 @@ impl RegexFilter {
     }
 }
 
+#[allow(unsafe_code)]
 mod tests {
     use super::RegexFilter;
     use crate::manipulator::Manipulator;
 
     struct MockManipulator {
-        called_with: Vec<String>,
+        called_with: &'static mut Vec<String>,
     }
 
     impl MockManipulator {
-        fn new() -> MockManipulator {
+        fn new(calls_vector: &'static mut Vec<String>) -> MockManipulator {
             MockManipulator {
-                called_with: Vec::new(),
+                called_with: calls_vector,
             }
         }
     }
@@ -76,23 +77,27 @@ mod tests {
     #[test]
     fn test_line_matching() {
         let regexp = regex::Regex::new(r"\s*(?i)i love you gabi\s*").unwrap();
-        let manip = MockManipulator::new();
-        let mut scanner = RegexFilter::new(regexp, Box::new(manip));
         let to_match = "    I love you Gabi     ";
-        assert_eq!(Some(String::from(to_match)), scanner.match_line(&to_match));
-        // any idea how to actually look at this without having to change the RegexFilter?
-        // assert_eq!(scanner.manipulator.called_with.len(), 1);
-        // assert_eq!(scanner.manipulator.called_with.first(), Some(&String::from(to_match)))
+        static mut MATCHES: Vec<String> = Vec::new();
+        unsafe {
+            let manip = MockManipulator::new(&mut MATCHES);
+            let mut scanner = RegexFilter::new(regexp, Box::new(manip));
+            assert_eq!(Some(String::from(to_match)), scanner.match_line(&to_match));
+            assert_eq!(MATCHES.len(), 1);
+            assert_eq!(MATCHES.first(), Some(&String::from(to_match)))
+        }
     }
     #[test]
     fn test_line_matching_negative() {
         let regexp = regex::Regex::new(r"\s*(?i)i love you gabi\s*").unwrap();
-        let manip = MockManipulator::new();
-        let mut scanner = RegexFilter::new(regexp, Box::new(manip));
         let to_match = "    i love my gabi     ";
-        assert_eq!(None, scanner.match_line(&to_match));
-        // any idea how to actually look at this without having to change the RegexFilter?
-        // assert_eq!(scanner.manipulator.called_with.len(), 0);
-        // assert_eq!(scanner.manipulator.called_with.first(), None)
+        static mut MATCHES: Vec<String> = Vec::new();
+        unsafe {
+            let manip = MockManipulator::new(&mut MATCHES);
+            let mut scanner = RegexFilter::new(regexp, Box::new(manip));
+            assert_eq!(None, scanner.match_line(&to_match));
+            assert_eq!(MATCHES.len(), 0);
+            assert_eq!(MATCHES.first(), None)
+        }
     }
 }
