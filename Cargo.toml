@@ -9,3 +9,6 @@ edition = "2018"
 [dependencies]
 regex = "1"
 log = "0.4"
+structopt = "0.3"
+stderrlog = "0.4"
+colored = "1.9"
