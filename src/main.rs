@@ -2,7 +2,7 @@
 #![deny(unsafe_code)]
 
 use regex::Regex;
-use std::{error::Error, path::{PathBuf, Path}};
+use std::{error::Error, path::PathBuf};
 use structopt::StructOpt;
 
 mod manipulator;
@@ -50,8 +50,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let changer: manipulator::Printer = Default::default();
     let scan = scan::RegexFilter::new(re_line, Box::new(changer));
-
-    read_file::find_files(opt.dir.as_path(), re_file, &Box::new(scan));
+    let mut b: Box<dyn scan::Scan> = Box::new(scan);
+    read_file::find_files(opt.dir.as_path(), &re_file, &mut b)?;
 
     Ok(())
 }

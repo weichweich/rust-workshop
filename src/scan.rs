@@ -4,7 +4,7 @@ use std::fs::{DirEntry, File};
 use std::io::{BufRead, BufReader};
 
 pub trait Scan {
-    fn scan(self: &Self, file: &DirEntry);
+    fn scan(self: &mut Self, file: &DirEntry);
 }
 
 pub struct RegexFilter {
@@ -51,8 +51,8 @@ impl RegexFilter {
 
 #[allow(unsafe_code)]
 mod tests {
-    use super::RegexFilter;
     use crate::manipulator::Manipulator;
+    use super::RegexFilter;
 
     struct MockManipulator {
         called_with: &'static mut Vec<String>,
