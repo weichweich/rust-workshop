@@ -7,12 +7,12 @@ pub trait Scan {
     fn scan(self: &mut Self, file: &DirEntry);
 }
 
-pub struct RegexFilter {
+pub struct RegexFilter<T: Manipulator> {
     filter: Regex,
-    manipulator: Box<dyn Manipulator>,
+    manipulator: T,
 }
 
-impl Scan for RegexFilter {
+impl<T: Manipulator> Scan for RegexFilter<T> {
     fn scan(self: &mut Self, file: &DirEntry) {
         let f = File::open(file.path())
             .unwrap_or_else(|_| panic!("Failed to read file {:?}", file.path()));
@@ -21,14 +21,14 @@ impl Scan for RegexFilter {
 
         // read a line into buffer
         while reader.read_line(&mut buffer).unwrap_or(0) != 0 {
-            self.match_line(&buffer[..]);
+            self.match_line(buffer.as_str());
             buffer.clear();
         }
     }
 }
 
-impl RegexFilter {
-    pub fn new(filter: Regex, manipulator: Box<dyn Manipulator>) -> Self {
+impl<T: Manipulator> RegexFilter<T> {
+    pub fn new(filter: Regex, manipulator: T) -> Self {
         Self {
             filter,
             manipulator,
@@ -49,19 +49,18 @@ impl RegexFilter {
     }
 }
 
-#[allow(unsafe_code)]
 mod tests {
-    use crate::manipulator::Manipulator;
     use super::RegexFilter;
+    use crate::manipulator::Manipulator;
 
     struct MockManipulator {
-        called_with: &'static mut Vec<String>,
+        called_with: Vec<String>,
     }
 
     impl MockManipulator {
-        fn new(calls_vector: &'static mut Vec<String>) -> MockManipulator {
+        fn new() -> MockManipulator {
             MockManipulator {
-                called_with: calls_vector,
+                called_with: Vec::new(),
             }
         }
     }
@@ -78,26 +77,21 @@ mod tests {
     fn test_line_matching() {
         let regexp = regex::Regex::new(r"\s*(?i)i love you gabi\s*").unwrap();
         let to_match = "    I love you Gabi     ";
-        static mut MATCHES: Vec<String> = Vec::new();
-        unsafe {
-            let manip = MockManipulator::new(&mut MATCHES);
-            let mut scanner = RegexFilter::new(regexp, Box::new(manip));
-            assert_eq!(Some(String::from(to_match)), scanner.match_line(&to_match));
-            assert_eq!(MATCHES.len(), 1);
-            assert_eq!(MATCHES.first(), Some(&String::from(to_match)))
-        }
+        let mut scanner = RegexFilter::new(regexp, MockManipulator::new());
+        assert_eq!(Some(String::from(to_match)), scanner.match_line(&to_match));
+        assert_eq!(scanner.manipulator.called_with.len(), 1);
+        assert_eq!(
+            scanner.manipulator.called_with.first(),
+            Some(&String::from(to_match))
+        );
     }
     #[test]
     fn test_line_matching_negative() {
         let regexp = regex::Regex::new(r"\s*(?i)i love you gabi\s*").unwrap();
         let to_match = "    i love my gabi     ";
-        static mut MATCHES: Vec<String> = Vec::new();
-        unsafe {
-            let manip = MockManipulator::new(&mut MATCHES);
-            let mut scanner = RegexFilter::new(regexp, Box::new(manip));
-            assert_eq!(None, scanner.match_line(&to_match));
-            assert_eq!(MATCHES.len(), 0);
-            assert_eq!(MATCHES.first(), None)
-        }
+        let mut scanner = RegexFilter::new(regexp, MockManipulator::new());
+        assert_eq!(None, scanner.match_line(&to_match));
+        assert_eq!(scanner.manipulator.called_with.len(), 0);
+        assert_eq!(scanner.manipulator.called_with.first(), None)
     }
 }

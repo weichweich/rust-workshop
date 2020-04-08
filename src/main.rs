@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // let re_highlight = Regex::new(&opt.highlight_re)?;
 
     let changer: manipulator::Printer = Default::default();
-    let scan = scan::RegexFilter::new(re_line, Box::new(changer));
+    let scan = scan::RegexFilter::new(re_line, changer);
     let mut b: Box<dyn scan::Scan> = Box::new(scan);
     read_file::find_files(opt.dir.as_path(), &re_file, &mut b)?;
 
