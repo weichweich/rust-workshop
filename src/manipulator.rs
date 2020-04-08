@@ -1,6 +1,6 @@
 use colored::*;
 use log;
-use regex::Regex;
+use regex::{Captures, Regex};
 
 pub trait Manipulator {
     fn manipulate(self: &mut Self, line: &str) -> Option<String>;
@@ -13,25 +13,10 @@ pub struct Printer {
 impl Manipulator for Printer {
     // highlight in a color
     fn manipulate(self: &mut Self, line: &str) -> Option<String> {
-        let mut my_vec: Vec<ColoredString> = vec![];
-        for word in line.split_whitespace() {
-            if self.highlight.is_match(word) {
-                my_vec.push(word.green());
-            } else {
-                my_vec.push(ColoredString::from(word));
-            }
-        }
-        Some(
-            my_vec
-                .iter()
-                .fold(String::from(""), |mut acc, word| {
-                    acc.push_str(&format!("{}", word));
-                    acc.push_str(" ");
-                    acc
-                })
-                .trim()
-                .to_string(),
-        )
+        Some(String::from(
+            self.highlight
+                .replace_all(line, |caps: &Captures| format!("{}", caps[0].green())),
+        ))
     }
 }
 
@@ -47,8 +32,16 @@ impl Default for Printer {
 #[cfg(test)]
 mod test {
     use super::{Manipulator, Printer};
+    // use colored::{Color, ColoredString};
     #[test]
     fn it_works() {
-        println!("{}", Printer::default().manipulate("Hello World").unwrap());
+        let highlight = Printer::default()
+            .manipulate("Hello World")
+            .unwrap_or(String::from(""));
+        println!("{}", highlight);
+        assert_ne!(highlight, "");
+        // FIXME: Why is colored_str.is_play() true?
+        // let colored_str = ColoredString::from(highlight.as_str());
+        // assert_eq!(colored_str.fgcolor(), Some(Color::Green))
     }
 }
