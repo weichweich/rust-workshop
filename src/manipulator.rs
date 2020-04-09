@@ -10,6 +10,14 @@ pub struct Printer {
     highlight: Regex,
 }
 
+impl Printer {
+    pub fn new(highlight: Regex) -> Self {
+        Self {
+            highlight
+        }
+    }
+}
+
 impl Manipulator for Printer {
     // highlight in a color
     fn manipulate(self: &mut Self, line: &str) -> Option<String> {

@@ -12,7 +12,7 @@ pub fn find_files(dir: &Path, re: &Regex, scanner: &mut Box<dyn Scan>) -> io::Re
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                find_files(&path, re, scanner);
+                find_files(&path, re, scanner)?;
             } else {
                 scanner.scan(&entry);
             }

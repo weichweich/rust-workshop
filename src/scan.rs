@@ -21,7 +21,9 @@ impl<T: Manipulator> Scan for RegexFilter<T> {
 
         // read a line into buffer
         while reader.read_line(&mut buffer).unwrap_or(0) != 0 {
-            self.match_line(buffer.as_str());
+            if let Some(line) = self.match_line(buffer.as_str()) {
+                print!("{}", line);
+            }
             buffer.clear();
         }
     }
