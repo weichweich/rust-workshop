@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 structopt = "0.3"
+log = "0.4"
+stderrlog = "0.4"
