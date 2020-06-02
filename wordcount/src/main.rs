@@ -1,13 +1,15 @@
 #![warn(clippy::all)]
 #![deny(unsafe_code)]
 
+mod parse;
+mod counter;
+
 use structopt::StructOpt;
-use std::{error::Error, path::{Path, PathBuf}, fs::{ReadDir, DirEntry, FileType}};
+use std::{error::Error, path::PathBuf};
 use log;
 use stderrlog;
 
-mod parse;
-mod counter;
+use counter::Counter;
 
 const NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -26,35 +28,17 @@ pub struct Opt {
     paths: Vec<PathBuf>,
 }
 
-fn count_words_in_file(path: &Path) -> Result<(), Box<dyn Error>> {
-    log::trace!("Scan file: {:?}", path);
-
-    Ok(())
-}
-
-fn count_words_in_directory(path: &Path) -> Result<(), Box<dyn Error>> {
-    log::trace!("Walk directory: {:?}", path);
-    for maybe_entry in path.read_dir()? {
-        let path = maybe_entry?.path();
-        if path.is_dir() {
-            count_words_in_directory(&path)?;
-        } else if path.is_file() {
-            count_words_in_file(&path)?;
-        }
-    }
-    Ok(())
-}
-
-fn count_words(paths: &[PathBuf]) -> Result<(), Box<dyn Error>> {
+fn count_words(paths: &[PathBuf]) -> Result<Counter, Box<dyn Error>> {
+    let mut counter = Counter::new();
     for path in paths {
         log::trace!("Going trough supplied path: {:?}", path);
         if path.is_dir() {
-            count_words_in_directory(path)?;
+            counter.count_words_in_directory(path)?;
         } else if path.is_file() {
-            count_words_in_file(path)?;
+            counter.count_words_in_file(path)?;
         }
     }
-    Ok(())
+    Ok(counter)
 }
 
 fn main() -> Result<(), Box<dyn Error>>{

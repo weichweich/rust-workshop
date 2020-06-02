@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 ///Iterates over all words in a given text file.
 pub struct TextIter {
@@ -6,7 +6,7 @@ pub struct TextIter {
 }
 
 impl TextIter {
-    fn from_file(file: PathBuf) -> TextIter {
+    pub fn new(file: &Path) -> TextIter {
         //TODO: read all content from a file. 
         //FIXME: might not be smart in reality because files can be huge!
         unimplemented!()
