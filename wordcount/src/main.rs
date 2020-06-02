@@ -1,7 +1,6 @@
 #![warn(clippy::all)]
 #![deny(unsafe_code)]
 
-mod parse;
 mod counter;
 
 use structopt::StructOpt;

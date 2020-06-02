@@ -1,5 +1,4 @@
-use crate::parse::TextIter;
-use std::{collections::HashMap, error::Error, path::Path};
+use std::{collections::HashMap, error::Error, path::Path, io::{BufRead, BufReader}, fs::File};
 
 pub struct Counter {
     //FIXME: Maybe there is a better data structure for the task?
@@ -19,10 +18,14 @@ impl Counter {
 
     pub fn count_words_in_file(&mut self, path: &Path) -> Result<(), Box<dyn Error>> {
         log::trace!("Scan file: {:?}", path);
-        let words = TextIter::new(path)?;
-        for maybe_word in words {
-            let word = maybe_word?;
-            self.count(&word);
+        let file = File::open(path)?;
+        let mut reader = BufReader::new(file);
+        let mut content = String::new();
+        while reader.read_line(&mut content)? != 0 {
+            for word in content.split(" ") {
+                self.count(word);
+            }
+            content.clear();
         }
         Ok(())
     }
