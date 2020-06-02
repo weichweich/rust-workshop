@@ -9,18 +9,21 @@ pub struct Counter {
 impl Counter {
     pub fn new() -> Self {
         // TODO: return a new instance of self!
-        unimplemented!()
+        Counter {}
     }
 
     pub fn count(&mut self, word: &str) {
+        log::trace!("Count word: {:?}", word);
         // TODO: count the given word!
-        unimplemented!()
     }
 
     pub fn count_words_in_file(&mut self, path: &Path) -> Result<(), Box<dyn Error>> {
         log::trace!("Scan file: {:?}", path);
-        let words = TextIter::new(path);
-        words.for_each(|w|self.count(&w));
+        let words = TextIter::new(path)?;
+        for maybe_word in words {
+            let word = maybe_word?;
+            self.count(&word);
+        }
         Ok(())
     }
 
