@@ -4,8 +4,8 @@ import pathlib
 
 try:
     import wikipedia
-except e:
-    raise RuntimeError("install wikipedia: `pip3 install wikipedia`") from e
+except Exception as e:
+    raise RuntimeError("install wikipedia `pip3 install wikipedia`") from e
 
 
 def main(out: str):
