@@ -47,7 +47,9 @@ fn main() -> Result<(), Box<dyn Error>>{
     stderrlog::new().verbosity(opt.verbose as usize).init()?;
     log::debug!("Start {}", NAME);
 
-    count_words(&opt.paths[..])?;
-
+    let counter = count_words(&opt.paths[..])?;
+    println!("Counted {} unique words", counter.count.keys().len() );
+    println!("Most common words:");
+    counter.print_most_common_words(10);
     Ok(())
 }
